@@ -31,6 +31,13 @@ export default tseslint.config(
       "prettier/prettier": ["error", { endOfLine: "auto", singleQuote: false }],
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
     },
   },
 );

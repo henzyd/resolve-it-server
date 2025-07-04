@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import { Otp } from "~/auth/entities/otp.entity";
 
 @Entity()
 export class User {
@@ -22,6 +24,12 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({ default: false })
+  is_verified: boolean;
+
+  @OneToMany(() => Otp, (otp) => otp.user)
+  otps: Otp[];
 
   @CreateDateColumn()
   created_at: Date;
