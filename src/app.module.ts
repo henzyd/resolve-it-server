@@ -1,11 +1,14 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { MailerModule } from "@nestjs-modules/mailer";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { join } from "path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
+import { MailModule } from "./mail/mail.module";
 
 @Module({
   imports: [
@@ -24,8 +27,33 @@ import { UserModule } from "./user/user.module";
       }),
       inject: [ConfigService],
     }),
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>("EMAIL_HOST"),
+          secure: true,
+          auth: {
+            user: configService.get<string>("EMAIL_USERNAME"),
+            pass: configService.get<string>("EMAIL_PASSWORD"),
+          },
+        },
+        defaults: {
+          from: "ResolveIt <onboarding@zydcode.com>",
+        },
+        template: {
+          dir: join(process.cwd(), "src/common/templates"),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     UserModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

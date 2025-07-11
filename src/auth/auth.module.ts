@@ -11,6 +11,7 @@ import { LocalStrategy } from "~/common/strategies/local.strategy";
 import { UserService } from "~/user/user.service";
 import { Otp } from "./entities/otp.entity";
 import { BlacklistToken } from "./entities/blacklist-token.entity";
+import { MailService } from "~/mail/mail.service";
 
 @Module({
   imports: [
@@ -30,6 +31,12 @@ import { BlacklistToken } from "./entities/blacklist-token.entity";
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, UserService],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    UserService,
+    MailService,
+  ],
 })
 export class AuthModule {}

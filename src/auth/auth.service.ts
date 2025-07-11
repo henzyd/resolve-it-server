@@ -5,15 +5,17 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Repository } from "typeorm";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import { SignupDto } from "./dto/signup.dto";
 import { User } from "~/user/entities/user.entity";
 import { UserService } from "~/user/user.service";
 import { Otp } from "./entities/otp.entity";
 import { BlacklistToken } from "./entities/blacklist-token.entity";
 import { hashString } from "~/common/utils/helpers";
+import { MailService } from "~/mail/mail.service";
 
 interface UserPayload {
   email: string;
@@ -24,13 +26,15 @@ interface UserPayload {
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private userRepo: Repository<User>,
+    private readonly userRepo: Repository<User>,
     @InjectRepository(Otp)
-    private otpRepo: Repository<Otp>,
+    private readonly otpRepo: Repository<Otp>,
     @InjectRepository(BlacklistToken)
-    private blacklistTokenRepo: Repository<BlacklistToken>,
-    private jwtService: JwtService,
-    private userService: UserService,
+    private readonly blacklistTokenRepo: Repository<BlacklistToken>,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
   ) {}
 
   private generateAccessToken(user: UserPayload): string {
@@ -104,9 +108,14 @@ export class AuthService {
 
     const otp = await this.generateOtp(newUser.id);
 
+    void this.mailService.sendRequestOtpMail(newUser.email, otp.code);
+
     return {
       message: "Signup successful. OTP sent to email.",
-      otp: process.env.NODE_ENV === "development" ? otp.code : undefined,
+      otp:
+        this.configService.get<string>("NODE_ENV") === "development"
+          ? otp.code
+          : undefined,
     };
   }
 
@@ -179,8 +188,6 @@ export class AuthService {
       await this.blacklistTokenRepo.save(entry);
     }
 
-    console.log(payload);
-
     const user = { id: payload.sub, email: payload.email };
 
     const accessToken = this.generateAccessToken(user);
@@ -221,7 +228,7 @@ export class AuthService {
 
     await this.otpRepo.delete(otp.id);
 
-    // Send welcome email
+    void this.mailService.sendWelcomeMail(user.email);
 
     return {
       message: "OTP verified successfully.",
