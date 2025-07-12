@@ -217,16 +217,27 @@ export class AuthService {
     if (!otp) throw new BadRequestException("Invalid OTP code.");
 
     const now = new Date();
-    if (otp.expired_at < now) throw new BadRequestException("OTP has expired.");
+    if (otp.expired_at < now) {
+      await this.otpRepo.delete(otp.id);
+      throw new BadRequestException("OTP has expired.");
+    }
 
     const user = await this.userRepo.findOneBy({ id: otp.user_id });
     if (!user) throw new NotFoundException("User not found.");
 
-    if (!user.is_verified) {
-      await this.userRepo.update(user.id, { is_verified: true });
-    }
+    await this.otpRepo.manager.transaction(
+      async (transactionalEntityManager) => {
+        if (!user.is_verified) {
+          await transactionalEntityManager.update(
+            this.userRepo.target,
+            user.id,
+            { is_verified: true },
+          );
+        }
 
-    await this.otpRepo.delete(otp.id);
+        await transactionalEntityManager.delete(this.otpRepo.target, otp.id);
+      },
+    );
 
     void this.mailService.sendWelcomeMail(user.email);
 
