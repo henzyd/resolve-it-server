@@ -14,14 +14,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
 
-    const error =
+    const errorObj =
       typeof exceptionResponse === "string"
         ? { message: exceptionResponse }
         : (exceptionResponse as Record<string, any>);
 
     response.status(status).json({
-      message: error.message || "An error occurred",
-      error: error.error || HttpException.name.replace("Exception", ""),
+      error: errorObj.message || "An error occurred",
     });
   }
 }
