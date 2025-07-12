@@ -201,13 +201,20 @@ export class AuthService {
 
   async requestOtp(email: string) {
     const user = await this.userService.findOne({ email });
-    if (!user.is_verified) throw new BadRequestException("User not verified");
+    if (user.is_verified) {
+      throw new BadRequestException("User is already verified.");
+    }
 
     const otp = await this.generateOtp(user.id);
 
+    void this.mailService.sendRequestOtpMail(email, otp.code);
+
     return {
       message: "OTP has been generated and sent to your email address.",
-      otp: process.env.NODE_ENV === "development" ? otp.code : undefined,
+      otp:
+        this.configService.get<string>("NODE_ENV") === "development"
+          ? otp.code
+          : undefined,
     };
   }
 
