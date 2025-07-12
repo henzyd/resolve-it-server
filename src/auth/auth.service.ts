@@ -74,15 +74,13 @@ export class AuthService {
 
   async validateCredentials(email: string, password: string) {
     const user = await this.userService.findOne({ email });
-    if (user && user.password === password) {
-      const { password: _, ...result } = user;
-      const isMatch = await this.comparePasswords(password, user.password);
-      if (!isMatch) {
-        throw new UnauthorizedException("Invalid credentials");
-      }
-      return result;
+    if (!user) return null;
+    const { password: _, ...result } = user;
+    const isMatch = await this.comparePasswords(password, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException("Invalid credentials");
     }
-    return null;
+    return result;
   }
 
   hashPassword(password: string) {
