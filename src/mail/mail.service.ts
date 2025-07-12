@@ -19,7 +19,7 @@ export class MailService {
     }
   }
 
-  async sendRequestOtpMail(email: string, code: number) {
+  async sendRequestOtpMail(email: string, code: string) {
     try {
       await this.mailerService.sendMail({
         to: email,

@@ -62,7 +62,7 @@ export class AuthService {
   }
 
   private async generateOtp(userId: string) {
-    const code = Math.floor(100000 + Math.random() * 900000);
+    const code = String(Math.floor(100000 + Math.random() * 900000));
     const otp = this.otpRepo.create({
       code,
       expired_at: new Date(Date.now() + 5 * 60 * 1000),
@@ -218,7 +218,7 @@ export class AuthService {
     };
   }
 
-  async verifyOtp(code: number) {
+  async verifyOtp(code: string) {
     const otp = await this.otpRepo.findOneBy({ code });
 
     if (!otp) throw new BadRequestException("Invalid OTP code.");
