@@ -14,7 +14,7 @@ export class Otp {
   id: string;
 
   @Column()
-  code: number;
+  code: string;
 
   @ManyToOne(() => User, (user) => user.otps, {
     onDelete: "CASCADE",
