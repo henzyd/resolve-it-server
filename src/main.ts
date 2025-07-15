@@ -3,7 +3,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { BadRequestException, ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module";
 import { DatabaseExceptionFilter } from "./common/filters/database-exception.filter";
-import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
 import { transformValidationErrors } from "./common/utils/validation";
 
 const PORT = process.env.PORT ?? 3000;
@@ -21,7 +21,7 @@ async function bootstrap() {
   );
   app.useGlobalFilters(
     new DatabaseExceptionFilter(),
-    new HttpExceptionFilter(),
+    new GlobalExceptionFilter(),
   );
   app.enableCors();
   const config = new DocumentBuilder()
