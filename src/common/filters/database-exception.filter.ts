@@ -39,8 +39,7 @@ export class DatabaseExceptionFilter implements ExceptionFilter {
     }
 
     const errorResponse = {
-      message,
-      error: error.error || HttpStatus[statusCode],
+      error: message,
     };
 
     response.status(statusCode).json(errorResponse);
