@@ -4,11 +4,10 @@ import {
   ExecutionContext,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
-  constructor(private jwtService: JwtService) {
+  constructor() {
     super();
   }
 
@@ -29,17 +28,6 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
       throw new UnauthorizedException(
         "Missing or malformed Authorization header",
       );
-    }
-
-    const token = authHeader.replace("Bearer ", "");
-
-    try {
-      this.jwtService.verify(token);
-    } catch (error) {
-      if (error.name === "TokenExpiredError") {
-        throw new UnauthorizedException("Access token has expired");
-      }
-      throw new UnauthorizedException("Invalid access token");
     }
 
     return user as TUser;
