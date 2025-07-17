@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MailerModule } from "@nestjs-modules/mailer";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { JwtModule } from "@nestjs/jwt";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { join } from "path";
 import { AppController } from "./app.controller";
@@ -9,6 +10,7 @@ import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
 import { MailModule } from "./mail/mail.module";
+import { TicketModule } from "./ticket/ticket.module";
 
 @Module({
   imports: [
@@ -51,9 +53,17 @@ import { MailModule } from "./mail/mail.module";
       }),
       inject: [ConfigService],
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>("JWT_SECRET"),
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     UserModule,
     MailModule,
+    TicketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

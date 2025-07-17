@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from "typeorm";
 import { Otp } from "~/auth/entities/otp.entity";
+import { Ticket } from "~/ticket/entities/ticket.entity";
 
 @Entity()
 export class User {
@@ -27,6 +28,11 @@ export class User {
 
   @Column({ default: false })
   is_verified: boolean;
+
+  @OneToMany(() => Ticket, (ticket) => ticket.user_id, {
+    cascade: true,
+  })
+  tickets: Ticket[];
 
   @OneToMany(() => Otp, (otp) => otp.user)
   otps: Otp[];
