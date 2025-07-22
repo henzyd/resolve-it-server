@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { PassportModule } from "@nestjs/passport";
-import { JwtService } from "@nestjs/jwt";
+import { JwtModule, JwtService } from "@nestjs/jwt";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { User } from "~/user/entities/user.entity";
@@ -14,9 +15,21 @@ import { MailService } from "~/mail/mail.service";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([Otp]),
-    TypeOrmModule.forFeature([BlacklistToken]),
+    TypeOrmModule.forFeature([User, Otp, BlacklistToken]),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>("JWT_SECRET");
+        if (!secret) {
+          throw new Error("JWT_SECRET environment variable is not defined");
+        }
+        return {
+          secret: configService.get<string>("JWT_SECRET"),
+        };
+      },
+      inject: [ConfigService],
+      global: true,
+    }),
     PassportModule,
   ],
   controllers: [AuthController],
