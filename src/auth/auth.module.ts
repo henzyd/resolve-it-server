@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { PassportModule } from "@nestjs/passport";
-import { JwtModule, JwtService } from "@nestjs/jwt";
+import { JwtModule } from "@nestjs/jwt";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { User } from "~/user/entities/user.entity";
@@ -16,6 +16,7 @@ import { MailService } from "~/mail/mail.service";
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Otp, BlacklistToken]),
+    PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
@@ -30,7 +31,6 @@ import { MailService } from "~/mail/mail.service";
       inject: [ConfigService],
       global: true,
     }),
-    PassportModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -39,7 +39,6 @@ import { MailService } from "~/mail/mail.service";
     JwtStrategy,
     UserService,
     MailService,
-    JwtService,
   ],
 })
 export class AuthModule {}
