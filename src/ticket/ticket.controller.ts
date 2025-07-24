@@ -30,6 +30,11 @@ export class TicketController {
     return this.ticketService.findAll(req.user.id);
   }
 
+  @Get("/stats")
+  getStats(@Request() req: AuthenticatedRequest) {
+    return this.ticketService.getStats(req.user.id);
+  }
+
   @Get(":id")
   findOne(@Param("id") id: string, @Request() req: AuthenticatedRequest) {
     return this.ticketService.findOne(id, req.user.id);
