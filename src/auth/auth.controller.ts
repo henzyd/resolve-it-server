@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Request, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+  BadRequestException,
+} from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { SignupDto } from "./dto/signup.dto";
 import { LocalAuthGuard } from "~/common/guards/local-auth.guard";
@@ -24,13 +31,19 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post("logout")
-  logout(@Body() { refresh_token }: { refresh_token: string }) {
-    return this.authService.logout(refresh_token);
+  logout(@Body() body: { refresh_token: string }) {
+    if (!body.refresh_token) {
+      throw new BadRequestException("Refresh token is required");
+    }
+    return this.authService.logout(body.refresh_token);
   }
 
   @Post("jwt/refresh")
-  refreshToken(@Body() { refresh_token }: { refresh_token: string }) {
-    return this.authService.refreshToken(refresh_token);
+  async refreshToken(@Body() body: { refresh_token: string }) {
+    if (!body.refresh_token) {
+      throw new BadRequestException("Refresh token is required");
+    }
+    return this.authService.refreshToken(body.refresh_token);
   }
 
   @Post("otp/new")
